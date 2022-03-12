@@ -2,102 +2,131 @@
 This test is the simplest check that every class initialises and every function runs
 We are going to replicate the wikipaedia example first
 https://en.wikipedia.org/wiki/Kullback%E2%80%93Leibler_divergence
+These are 1 dimensional tests
 '''
 import pandas as pd
-
+import os
 import AlcraftWilliamsAssociation as awa
+import ReportExport as re
 
-dataA = pd.DataFrame(data={'col1':[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2]})
-dataB = pd.DataFrame(data={'col1':[0,1,2]})
+# Set up a report to save the results to
+dir_path = os.path.dirname(os.path.realpath(__file__))
+test1 = re.ReportExport('Test Set 1',dir_path + '/output/Tests01.html',cols=6)
 
 # TESTS 1 and 2 K-L from wikipedia gives the same reults
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,dataB,method='k-l',bins=3)
+bins = 3
+test1.addLineComment(' ----- Test 01 ----- <br/>Kullback-Leibler P-Q') ####################################################################################
+dataA = pd.DataFrame(data={'col1':[0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2]})
+dataB = pd.DataFrame(data={'col1':[0,1,2]})
+rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,dataB,method='k-l',bins=bins)
 assocpq = rae_mark_kl_pq.addAssociation(['col1'])
 statpq = round(assocpq.metric,5)
+## OUTPUT TO PRINT and REPORT
+# Ouput to report
+test1.addPlot1d(dataA,'histogram','col1',bins=bins)
+test1.addPlot1d(dataB,'histogram','col1',bins=bins)
+boxA = ''
+for v in assocpq.matA:
+    boxA += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxA)
+boxD = ''
+for v in assocpq.matDiff:
+    boxD += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxD)
+boxB = ''
+for v in assocpq.matB:
+    boxB += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxB)
+# and to print
+if (statpq == 0.08530):
+    print('TEST 01 has passed: Kullback-Leibler Divergence PQ',statpq)
+    test1.addBoxComment('TEST 01 has passed: Kullback-Leibler Divergence PQ ' + str(statpq))
+else:
+    print('!!! TEST 01 FAILED !!!: Kullback-Leibler Divergence PQ',statpq)
+    test1.addBoxComment('!!! TEST 01 FAILED !!!: Kullback-Leibler Divergence PQ ' + str(statpq))
+
+test1.addLineComment(' ----- Test 02 ----- <br/>Kullback-Leibler Q-P') ###################################################################################
 rae_mark_kl_qp = awa.AlcraftWilliamsAssociation(dataB,dataA,method='k-l',bins=3)
 assocqp = rae_mark_kl_qp.addAssociation(['col1'])
 statqp = round(assocqp.metric,5)
-if (statpq == 0.08530):
-    print('TEST 01 has passed: Kullback-Leibler Divergence PQ',statpq)
+# Ouput to report
+test1.addPlot1d(dataB,'histogram','col1',bins=bins)
+test1.addPlot1d(dataA,'histogram','col1',bins=bins)
+boxA = ''
+for v in assocqp.matA:
+    boxA += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxA)
+boxD = ''
+for v in assocqp.matDiff:
+    boxD += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxD)
+boxB = ''
+for v in assocqp.matB:
+    boxB += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxB)
+# and to print
+if (statqp == 0.09746):
+    print('TEST 01 has passed: Kullback-Leibler Divergence PQ',statqp)
+    test1.addBoxComment('TEST 01 has passed: Kullback-Leibler Divergence PQ ' + str(statqp))
 else:
     print('!!! TEST 01 FAILED !!!: Kullback-Leibler Divergence PQ',statpq)
-if (statqp == 0.09746):
-    print('TEST 02 has passed: Kullback-Leibler Divergence QP',statqp)
+    test1.addBoxComment('!!! TEST 01 FAILED !!!: Kullback-Leibler Divergence PQ ' + str(statqp))
+
+# TESTS 3 my abs diff calc
+test1.addLineComment(' ----- Test 03 ----- <br/>AbsVal Diffference calculation') ###################################################################################
+rae_mark = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=3)
+assoc = rae_mark.addAssociation(['col1'])
+stat = round(assoc.metric,5)
+# Ouput to report
+test1.addPlot1d(dataB,'histogram','col1',bins=bins)
+test1.addPlot1d(dataA,'histogram','col1',bins=bins)
+boxA = ''
+for v in assoc.matA:
+    boxA += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxA)
+boxD = ''
+for v in assoc.matDiff:
+    boxD += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxD)
+boxB = ''
+for v in assoc.matB:
+    boxB += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxB)
+# and to print
+if (stat == 0.17333):
+    print('TEST 03 has passed: Abs Dfference',stat)
+    test1.addBoxComment('TEST 03 has passed: Abs Dfference ' + str(stat))
 else:
-    print('!!! TEST 02 FAILED !!!: Kullback-Leibler Divergence QP',statqp)
+    print('!!! TEST 03 has FAILED!!!: Abs Difference',stat)
+    test1.addBoxComment('!!! TEST 03 has FAILED !!!: Abs Difference ' + str(stat))
 
-
-# TESTS 3 and 4 my abs diff calc
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=3)
-assocpq = rae_mark_kl_pq.addAssociation(['col1'])
-statpq = round(assocpq.metric,5)
-rae_mark_kl_qp = awa.AlcraftWilliamsAssociation(dataB,dataA,bins=3)
-assocqp = rae_mark_kl_qp.addAssociation(['col1'])
-statqp = round(assocqp.metric,5)
-if (statpq == 0.26):
-    print('TEST 03 has passed: Abs Difference Divergence PQ',statpq)
+test1.addLineComment(' ----- Test 04 ----- <br/>Compare 1 histogram to convolved') ###################################################################################
+rae_mark = awa.AlcraftWilliamsAssociation(dataA,bins=3)
+assoc = rae_mark.addAssociation(['col1'])
+stat = round(assoc.metric,5)
+# Ouput to report
+test1.addPlot1d(dataB,'histogram','col1',bins=bins)
+test1.addPlot1d(dataA,'histogram','col1',bins=bins)
+boxA = ''
+for v in assoc.matA:
+    boxA += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxA)
+boxD = ''
+for v in assoc.matDiff:
+    boxD += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxD)
+boxB = ''
+for v in assoc.matB:
+    boxB += str(round(v,5)) + '<br/>'
+test1.addBoxComment(boxB)
+# and to print
+if (stat == 0):
+    print('TEST 05 has passed: Kullback-Leibler Divergence Zero',stat)
+    test1.addBoxComment('TEST 05 has passed: K-L zero ' + str(stat))
 else:
-    print('!!! TEST 03 FAILED !!!: Abs Difference Divergence PQ',statpq)
-if (statqp == 0.26):
-    print('TEST 04 has passed: Abs Difference Divergence QP',statqp)
-else:
-    print('!!! TEST 04 FAILED !!!: Abs Difference Divergence QP',statqp)
+    print('!!! TEST 05 FAILED !!!: Kullback-Leibler Divergence Zero',stat)
+    test1.addBoxComment('!!! TEST 05 has FAILED !!!: K-L zero ' + str(stat))
 
-# TEST 5 K-L from wikipedia convolved is 0
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,method='k-l',bins=3)
-assocpq = rae_mark_kl_pq.addAssociation(['col1'])
-statpq = round(assocpq.metric,5)
-if (statpq == 0):
-    print('TEST 05 has passed: Kullback-Leibler Divergence Zero',statpq)
-else:
-    print('!!! TEST 05 FAILED !!!: Kullback-Leibler Divergence Zero',statpq)
-
-# TEST 6 Make a simple 2d case
-dataA = pd.DataFrame(data={'col1':[0,1,2],'col2':[0,1,2]})
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,bins=3)
-assocpq = rae_mark_kl_pq.addAssociation(['col1','col2'])
-statpq = round(assocpq.metric,5)
-if (statpq == 1):
-    print('TEST 06 has passed: Kullback-Leibler Divergence Straight Line',statpq)
-else:
-    print('!!! TEST 06 FAILED !!!: Kullback-Leibler Divergence Straight Line',statpq)
-
-# TEST 7 Make a simple 2d case
-dataA = pd.DataFrame(data={'col1':[0,1,2,3,4,5],'col2':[0,1,2,3,4,5]})
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,bins=6)
-assocpq = rae_mark_kl_pq.addAssociation(['col1','col2'])
-statpq = round(assocpq.metric,5)
-if (statpq == 1):
-    print('TEST 07 has passed: Kullback-Leibler Divergence Straight Line',statpq)
-else:
-    print('!!! TEST 07 FAILED !!!: Kullback-Leibler Divergence Straight Line',statpq)
-
-# TEST 8 Make a simple 2d case
-dataA = pd.DataFrame(data={'col1':[0,1,2,3,3,3],'col2':[3,3,5,5,4,4]})
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,bins=3)
-assocpq = rae_mark_kl_pq.addAssociation(['col1','col2'])
-statpq = round(assocpq.metric,5)
-if (statpq == 0.75):
-    print('TEST 08 has passed: Kullback-Leibler Divergence some order',statpq)
-else:
-    print('!!! TEST 08 FAILED !!!: Kullback-Leibler Divergence some order',statpq)
-
-# TEST 9 Make a simple 2d case
-dataA = pd.DataFrame(data={'col1':[0,1,2,3,4,5],'col2':[0,1,2,3,4,5]})
-dataB = pd.DataFrame(data={'col1':[0,1,2,3,3,3],'col2':[3,3,5,5,4,4]})
-rae_mark_kl_pq = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=3)
-assocpq = rae_mark_kl_pq.addAssociation(['col1','col2'])
-statpq = round(assocpq.metric,5)
-if (statpq == 0.75):
-    print('TEST 09 has passed: Kullback-Leibler Divergence some order',statpq)
-else:
-    print('!!! TEST 09 FAILED !!!: Kullback-Leibler Divergence some order',statpq)
-
-#rae_mark_comp.addAssociation(['col1','col1'])
-#rae_mark_comp.addAssociation(['col1','col1','col1'])
-
-#rae_mark_conv = awa.AlcraftWilliamsAssociation(dataA)
-#rae_mark_conv.addAssociation(['col1'])
-#rae_mark_conv.addAssociation(['col1','col1'])
-#rae_mark_conv.addAssociation(['col1','col1','col1'])
+# Finally print out the report
+test1.printReport()
 

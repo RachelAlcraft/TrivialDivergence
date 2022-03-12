@@ -1,4 +1,5 @@
 import math
+import random
 
 import pandas as pd
 import numpy as np
@@ -7,12 +8,11 @@ import numpy as np
 ### DATA CLASS ###
 #############################################################################################################
 class Association:
-    def __init__(self,cols,histA,histB,histDiff,stat):
-        self.cols = cols
-        self.dims = len(cols)
+    def __init__(self,cols,histA,histDiff,histB,stat):
+        self.cols = cols        
         self.matA = histA
-        self.matB = histB
         self.matDiff = histDiff
+        self.matB = histB        
         self.metric = stat
         self.phistA = None
         self.phistB = None
@@ -23,7 +23,7 @@ class Association:
 ### ASSOCIATION CLASS ###
 ###################################################################################################################
 class AlcraftWilliamsAssociation:
-    def __init__(self, dfA, dfB=pd.DataFrame(data={}),method='diff',bins=10):
+    def __init__(self, dfA, dfB=pd.DataFrame(data={}),method='diff',bins=10,piters=0):
         self.dfA = dfA
         self.dfB = dfB
         self.convolved = False
@@ -32,8 +32,9 @@ class AlcraftWilliamsAssociation:
         self.method = method
         self.associations = {}
         self.bins = bins
+        self.piters = piters
 
-    ##### Public class interface ###################################################################################
+    ##### Public class interface ###################################################################################    
     def addAssociation(self,cols):
         key = self.__getKey(cols)
         # https://numpy.org/doc/stable/reference/generated/numpy.histogramdd.html
@@ -64,14 +65,59 @@ class AlcraftWilliamsAssociation:
         else:
             stat,histD = self.__calcMetric_AbsDifference(cols,histA,histB)
 
-        assoc = Association(cols,histA,histB,histD,stat)
+        histA = np.transpose(histA)
+        histB = np.transpose(histB)
+        histD = np.transpose(histD)
+        assoc = Association(cols,histA,histD,histB,stat)
+        
+        pval,A,B = self.calcPValue(cols)
+        assoc.pvalue = pval
+        assoc.phistA = A
+        assoc.phistB = B
+                
         self.associations[key] = assoc
         return assoc
 
+    def calcPValue(self,cols):
+        histsA = []
+        histsB = []
 
-
-
-
+        if self.piters > 0:            
+            for i in range(self.piters):
+                newA = self.getResampledData(self.dfA,cols)
+                if self.convolved:
+                    newB = self.getShuffledData(self.dfA,cols)
+                else:
+                    newB = self.getResampledData(self.dfA,cols)
+                fake_aw_a = AlcraftWilliamsAssociation(newA,method=self.method,bins=self.bins)
+                assoc_a = fake_aw_a.addAssociation(cols)
+                fake_aw_b = AlcraftWilliamsAssociation(newB,method=self.method,bins=self.bins)
+                assoc_b = fake_aw_b.addAssociation(cols)
+                histsA.append(assoc_a.metric)
+                histsB.append(assoc_b.metric)                
+            
+            # the pvalue is the area they share                                                                                    
+            pmin = max(histsA)
+            pmax = min(histsB)
+            if max(histsA) > max(histsB):
+                pmin = max(histsB)
+                pmax = min(histsA)                                        
+            count = len(histsA)                    
+            count_between = 0                  
+            for hs in histsA:
+                if hs >= pmax and hs <= pmin:
+                    count_between +=1                        
+            for hs in histsB:
+                if hs >= pmax and hs <= pmin:
+                    count_between +=1                        
+            total_area = 2 - (count_between/count)/2
+            under_area = (count_between/count)/2            
+            p_value = under_area / total_area
+            return p_value,histsA,histsB
+        else:
+            return -1,[],[]
+        
+    
     def getAssociation(self,cols):
         if self.__getKey(cols) in self.associations:
             return self.associations[self.__getKey(cols)]
@@ -82,6 +128,19 @@ class AlcraftWilliamsAssociation:
             else:
                 return None
 
+    def getShuffledData(self,data,cols):
+        dic_cut= {}
+        for col in cols:
+            cut_data = list(data[col].values)
+            random.shuffle(cut_data)
+            dic_cut[col] = cut_data
+        df_cut = pd.DataFrame.from_dict(dic_cut)
+        return df_cut
+
+    def getResampledData(self,data,cols):        
+        dataresampled = data.sample(frac=1,replace=True)        
+        return dataresampled
+    
     ##### Public and private class interface ########################################################################
     def getMetric(self,cols):
         if self.method == 'k-l':
@@ -162,9 +221,9 @@ class AlcraftWilliamsAssociation:
         for i in range(len(vecA)):
             a = vecA[i]
             b = vecB[i]
-            diff = abs(a-b)
+            diff = a-b
             vecD[i] = diff
-            stat += diff
+            stat += abs(diff)
             #print(a,b,diff,stat)
         # a norm step adjusts the metric for bons        
         stat = stat / 2
