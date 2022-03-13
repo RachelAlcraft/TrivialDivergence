@@ -14,16 +14,17 @@ dir_path = os.path.dirname(os.path.realpath(__file__))
 test3 = re.ReportExport('Test Set 3',dir_path + '/output/Tests03.html',cols=6)
 
 bins = 20
+method = 'k-l'
 def addTest(num,datas,cols,comment,result):
     test3.addLineComment(comment) ###################################################################################
     if len(datas) == 1:
         dataA = datas[0]
-        rae_mark = awa.AlcraftWilliamsAssociation(dataA,bins=bins,piters=1000)
+        rae_mark = awa.AlcraftWilliamsAssociation(dataA,bins=bins,piters=1000,method=method)
         dataB =rae_mark.getShuffledData(dataA ,cols)
     else:
         dataA=datas[0]
         dataB=datas[1]
-        rae_mark = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=bins,piters=1000)
+        rae_mark = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=bins,piters=1000,method=method)
             
     assoc = rae_mark.addAssociation(['col1','col2'])
     stat = round(assoc.metric,5)
@@ -39,9 +40,9 @@ def addTest(num,datas,cols,comment,result):
     maxV = max(np.max(D), -1*np.min(D))
     #test3.addSurface(A, 'Original Data', cmin=0, cmax=maxV, palette='Blues', colourbar=False)    
     #test3.addSurface(B, 'Compare Data', cmin=0, cmax=maxV, palette='Reds', colourbar=False)    
-    test3.addPlot1d(hA, 'histogram', title='', overlay=True, alpha=0.5,palette='steelblue')
-    test3.addPlot1d(hB, 'histogram', title='', alpha=0.5,palette='Firebrick')
-    test3.addSurface(D, 'Difference Data', cmin=-1 * maxV, cmax=maxV, palette='RdBu', colourbar=False)
+    test3.addPlot1d(hA,'histogram', title='', overlay=True, alpha=0.5,palette='steelblue')
+    test3.addPlot1d(hB,'histogram',alpha=0.5,palette='Firebrick',title='P-value='+str(round(pvalue,4)))
+    test3.addSurface(D, cmin=-1 * maxV, cmax=maxV, palette='RdBu', colourbar=False,title='Metric='+str(stat))
 
     # print results
     passes = False
@@ -51,7 +52,7 @@ def addTest(num,datas,cols,comment,result):
         passes = stat >= result[0] and stat <= result[1]
     if passes:
         print('TEST',num,'has passed',stat)
-        test3.addBoxComment('TEST 01 has passed<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
+        test3.addBoxComment('TEST ' + str(num) + ' has passed<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
     else:
         print('!!! TEST ',num, 'FAILED !!!',stat)
         test3.addBoxComment('!!! TEST ' + str(num) + ' FAILED !!!<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))

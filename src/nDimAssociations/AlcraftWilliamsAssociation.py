@@ -182,11 +182,14 @@ class AlcraftWilliamsAssociation:
         for i in range(len(shaped)):
             val = 1
             perm = perms[i]
-            for p in perm:
-                for c in range(len(cols)):
-                    col = cols[c]
-                    histX = hists[c]
-                    val *= histX[p]
+            for j in range(len(perm)):
+                #for c in range(len(cols)):
+                #    col = cols[c]
+                #    histX = hists[c]
+                #    val *= histX[p]                
+                p = int(perm[j])
+                histX = hists[j]
+                val *= histX[p]
             shaped[i] = val
         shaped = self.__setAllPermutations(shaped, shape)
         return shaped
