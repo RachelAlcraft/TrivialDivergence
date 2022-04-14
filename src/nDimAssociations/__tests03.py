@@ -13,18 +13,19 @@ import ReportExport as re
 dir_path = os.path.dirname(os.path.realpath(__file__))
 test3 = re.ReportExport('Test Set 3',dir_path + '/output/Tests03.html',cols=6)
 
-bins = 20
-method = 'k-l'
+bins = 5
+method = 'diff'
+piters = 500
 def addTest(num,datas,cols,comment,result):
     test3.addLineComment(comment) ###################################################################################
     if len(datas) == 1:
         dataA = datas[0]
-        rae_mark = awa.AlcraftWilliamsAssociation(dataA,bins=bins,piters=1000,method=method)
+        rae_mark = awa.AlcraftWilliamsAssociation(dataA,bins=bins,piters=piters,method=method)
         dataB =rae_mark.getShuffledData(dataA ,cols)
     else:
         dataA=datas[0]
         dataB=datas[1]
-        rae_mark = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=bins,piters=1000,method=method)
+        rae_mark = awa.AlcraftWilliamsAssociation(dataA,dataB,bins=bins,piters=piters,method=method)
             
     assoc = rae_mark.addAssociation(['col1','col2'])
     stat = round(assoc.metric,5)
@@ -52,10 +53,12 @@ def addTest(num,datas,cols,comment,result):
         passes = stat >= result[0] and stat <= result[1]
     if passes:
         print('TEST',num,'has passed',stat)
-        test3.addBoxComment('TEST ' + str(num) + ' has passed<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
+        #test3.addBoxComment('TEST ' + str(num) + ' has passed<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
+        test3.addBoxComment('TEST ' + str(num) + '<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
     else:
         print('!!! TEST ',num, 'FAILED !!!',stat)
-        test3.addBoxComment('!!! TEST ' + str(num) + ' FAILED !!!<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
+        #test3.addBoxComment('!!! TEST ' + str(num) + ' FAILED !!!<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
+        test3.addBoxComment('TEST ' + str(num) + '<br/>Metric=' + str(stat) + '<br/>P-value=' + str(round(pvalue,4)))
 
 # now generate 4 sets of more extremme data
 x = []
@@ -63,6 +66,7 @@ lineA = []
 lineB = []
 lineC = []
 lineD = []
+lineE = []
 
 for i in range(1000):
     x.append(i)
@@ -70,17 +74,20 @@ for i in range(1000):
     lineB.append(np.random.normal(0,1000))
     lineC.append(cos(i/100))
     lineD.append(i + np.random.normal(0,50))
+    lineE.append(i+ np.random.normal(0,50))
 
 dataA = pd.DataFrame(data={'col1':x,'col2':lineA})
 dataB = pd.DataFrame(data={'col1':x,'col2':lineB})
 dataC = pd.DataFrame(data={'col1':x,'col2':lineC})
 dataD = pd.DataFrame(data={'col1':x,'col2':lineD})
+dataE = pd.DataFrame(data={'col1':x,'col2':lineE})
 
 addTest(1,[dataA],['col1','col2'],' ----- Test 01 ----- <br/>Highly associated line',[0.95])
 addTest(2,[dataB],['col1','col2'],' ----- Test 02 ----- <br/>Quite random',[0.3,0.6])
 addTest(3,[dataC],['col1','col2'],' ----- Test 03 ----- <br/>Sinusoidal',[0.80414])
 addTest(4,[dataD],['col1','col2'],' ----- Test 04 ----- <br/>Blurred line',[0.6,0.8])
-addTest(5,[dataA,dataD],['col1','col2'],' ----- Test 05 ----- <br/>Line to line',[0.3,0.6])
+addTest(5,[dataD,dataA],['col1','col2'],' ----- Test 05 ----- <br/>Line to line',[0.3,0.6])
+addTest(6,[dataD,dataE],['col1','col2'],' ----- Test 06 ----- <br/>Drawn from same distribution',[0.3,0.6])
 
 # Finally print out the report
 test3.printReport()

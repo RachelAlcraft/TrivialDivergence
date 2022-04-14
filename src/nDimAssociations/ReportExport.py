@@ -45,6 +45,28 @@ class ReportExport:
         f = open(self.outpath, "w+")
         f.write(self.html_string)
         f.close()
+    
+    def printAssociations(self,aw, data, x,y,z='',palette='Spectral',duo=False,piters=0):
+        data = data.reset_index()        
+        for i in range(0,len(data.index)):
+            metric = round(data['metric'][i],4)
+            xval = data[x][i]
+            yval = data[y][i]            
+            if z == '':
+                if piters is not 0 force a recalc and include p-value
+                #aw.getAssociation([xval,yval])
+                title = xval + ' | ' + yval + ' metric=' + str(metric)
+                self.addPlot2d(aw.dfA,'scatter',geo_x=xval,geo_y=yval,title=title)    
+                if duo:
+                    self.addPlot2d(aw.dfB,'scatter',geo_x=xval,geo_y=yval,title=title)    
+            else:
+                zval = data[z][i]
+                #aw.getAssociation([xval,yval,zval])
+                title = xval + ' | ' + yval + ' | ' + zval + ' metric=' + str(metric)
+                self.addPlot2d(aw.dfA,'scatter',geo_x=xval,geo_y=yval,hue=zval,title=title)    
+                if duo:
+                    self.addPlot2d(aw.dfB,'scatter',geo_x=xval,geo_y=yval,hue=zval,title=title)    
+        self.printReport()
 
     def changeColNumber(self,cols):
         self.cols = cols
