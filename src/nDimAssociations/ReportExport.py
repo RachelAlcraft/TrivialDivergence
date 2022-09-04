@@ -53,7 +53,7 @@ class ReportExport:
             xval = data[x][i]
             yval = data[y][i]            
             if z == '':
-                if piters is not 0 force a recalc and include p-value
+                #if piters is not 0 force a recalc and include p-value
                 #aw.getAssociation([xval,yval])
                 title = xval + ' | ' + yval + ' metric=' + str(metric)
                 self.addPlot2d(aw.dfA,'scatter',geo_x=xval,geo_y=yval,title=title)    
