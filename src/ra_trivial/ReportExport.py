@@ -8,7 +8,10 @@ import base64
 import gc
 import io
 
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+
 import seaborn as sns
 import numpy as np
 from scipy.stats import gaussian_kde

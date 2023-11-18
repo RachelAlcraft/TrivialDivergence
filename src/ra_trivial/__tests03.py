@@ -6,7 +6,7 @@ from math import cos
 import numpy as np
 import pandas as pd
 import os
-import AlcraftWilliamsAssociation as awa
+import src.ra_trivial.trivial as awa
 import ReportExport as re
 
 # Set up a report to save the results to

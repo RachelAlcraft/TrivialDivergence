@@ -6,7 +6,7 @@ These are 1 dimensional tests
 '''
 import pandas as pd
 import os
-import AlcraftWilliamsAssociation as awa
+import src.ra_trivial.trivial as awa
 import ReportExport as re
 
 # Set up a report to save the results to

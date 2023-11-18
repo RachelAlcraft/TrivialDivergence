@@ -190,7 +190,7 @@ class AlcraftWilliamsAssociation:
         dataresampled = data.sample(frac=1,replace=True)        
         return dataresampled
     
-    def getStrongestAssociations(self,colsA,colsB,dims_plus,fraction=1):
+    def getStrongestAssociations(self,colsA,colsB,dims_plus,fraction=1.0,sort=True):
         cols_sure = list(colsA)
         cols_in_scope = list(colsB)
         for col in cols_sure:            
@@ -198,7 +198,7 @@ class AlcraftWilliamsAssociation:
                 cols_in_scope.remove(col)            
         # first we are only going to have in scope those that have a reasonable stat in 2d. The fraction is used.
         if fraction < 1 and dims_plus > 1 and len(colsA) == 1: #it only makes to try the cols that are 2d associated to 1
-            df2 = self.getStrongestAssociations_inner(cols_sure,cols_in_scope,1)
+            df2 = self.getStrongestAssociations_inner(cols_sure,cols_in_scope,1,sort=sort)
             last_col = len(cols_sure)+1 #it will be the first col
             rows = int(len(df2.index)*fraction)
             if len(colsA)>0:
@@ -206,11 +206,11 @@ class AlcraftWilliamsAssociation:
             cols_cut = df2['col' + str(last_col)].values                
         else:
             cols_cut = cols_in_scope
-        dfall = self.getStrongestAssociations_inner(cols_sure,cols_cut,dims_plus)
+        dfall = self.getStrongestAssociations_inner(cols_sure,cols_cut,dims_plus,sort=sort)
         dfall = dfall.reset_index()
         return dfall
 
-    def getStrongestAssociations_inner(self,colsA,colsB,dims_plus):
+    def getStrongestAssociations_inner(self,colsA,colsB,dims_plus,sort=True):
         if self.loglevel>1:
             print('AWDiv(2) strongest inner:',colsA,len(colsB))
         import itertools
@@ -240,7 +240,8 @@ class AlcraftWilliamsAssociation:
             asso = self.getAssociation(col_list)
             strongest_dic['metric'].append(asso.metric)                
         df_strongest = pd.DataFrame.from_dict(strongest_dic)
-        df_strongest = df_strongest.sort_values(by='metric',ascending=False)
+        if sort:
+            df_strongest = df_strongest.sort_values(by='metric',ascending=False)
         return df_strongest
             
         
