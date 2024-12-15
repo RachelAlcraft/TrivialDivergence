@@ -11,4 +11,11 @@ It is installed on PyPi and can installed with
 
 pip install ra-trivial
 
+### Development
+python3 -m venv .venv
+source .venv/bin/activate
+pip install --upgrade pip
+pip install -r requirements.txt --upgrade
+
+
  

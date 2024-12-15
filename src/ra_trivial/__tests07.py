@@ -5,8 +5,8 @@ from math import cos
 import numpy as np
 import pandas as pd
 import os
-import src.ra_trivial.trivial as awa
-import ReportExport as re
+import trivial as awa
+import reports as re
 
 # Set up a report to save the results to
 dir_path = os.path.dirname(os.path.realpath(__file__))

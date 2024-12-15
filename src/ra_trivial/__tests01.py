@@ -7,7 +7,7 @@ These are 1 dimensional tests
 import pandas as pd
 import os
 import src.ra_trivial.trivial as awa
-import ReportExport as re
+import src.ra_trivial.reports as re
 
 # Set up a report to save the results to
 dir_path = os.path.dirname(os.path.realpath(__file__))
